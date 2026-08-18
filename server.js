@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 2233;
 // Change this value to set the password for /report.
 const ADMIN_PASSWORD = 'sdteam2026';
 const ROOT = __dirname;
