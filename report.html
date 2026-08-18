@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="my">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Survey Report · SD Team</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:"Noto Sans Myanmar","Plus Jakarta Sans",system-ui,sans-serif;background:radial-gradient(circle at top left,#eef2ff,transparent 36%),#f8fafc}.number{font-family:"Plus Jakarta Sans",sans-serif}</style>
+</head>
+<body class="min-h-screen text-slate-800">
+  <main class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <section id="loginView" class="mx-auto mt-12 max-w-md rounded-[2rem] border border-white bg-white/90 p-7 shadow-2xl shadow-indigo-100 sm:p-9">
+      <div class="mb-7 text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-2xl text-white shadow-lg shadow-indigo-200">▥</div>
+        <p class="text-xs font-bold uppercase tracking-[.2em] text-indigo-600">SD Team</p>
+        <h1 class="mt-2 text-2xl font-extrabold tracking-tight">Survey Report</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-500">Report ကိုကြည့်ရန် password ထည့်သွင်းပါ။</p>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <label class="block text-sm font-semibold text-slate-700" for="password">Password</label>
+        <input id="password" type="password" required autofocus class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100" placeholder="Password ထည့်ပါ">
+        <p id="loginError" class="hidden text-sm font-medium text-rose-600"></p>
+        <button class="w-full rounded-2xl bg-indigo-600 py-3.5 font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 active:scale-[.98]">Report ကိုဝင်မည်</button>
+      </form>
+      <a href="/" class="mt-6 block text-center text-sm font-semibold text-slate-500 hover:text-indigo-600">← Survey သို့ပြန်သွားမည်</a>
+    </section>
+
+    <section id="reportView" class="hidden space-y-6">
+      <header class="flex flex-col justify-between gap-5 rounded-[2rem] bg-gradient-to-br from-slate-950 via-indigo-950 to-violet-900 p-6 text-white shadow-xl sm:flex-row sm:items-center sm:p-8">
+        <div><p class="text-xs font-bold uppercase tracking-[.2em] text-indigo-200">SD Team · Private</p><h1 class="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">Training Feedback Report</h1><p id="updated" class="mt-2 text-sm text-indigo-200">Loading data…</p></div>
+        <div class="flex gap-2"><button onclick="loadReport()" class="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold backdrop-blur hover:bg-white/25">Refresh</button><button onclick="exportExcel()" class="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-indigo-700 hover:bg-indigo-50">Export Excel</button></div>
+      </header>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <article class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Responses</p><p id="total" class="number mt-2 text-3xl font-extrabold">0</p></article>
+        <article class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Satisfaction</p><p id="average" class="number mt-2 text-3xl font-extrabold">0.0 <span class="text-base font-semibold text-slate-400">/ 5</span></p></article>
+        <article class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Support readiness</p><p id="readiness" class="number mt-2 text-3xl font-extrabold">0%</p></article>
+      </div>
+      <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 class="font-extrabold">Feedback records</h2><p class="mt-1 text-sm text-slate-500">Latest responses appear first · Survey answers အားလုံးကိုကြည့်နိုင်ပါသည်။</p></div><input id="search" oninput="renderRows()" class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-500" placeholder="Search feedback"></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[1750px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th class="p-4">Reference</th><th class="p-4">Date</th><th class="p-4">Q1</th><th class="p-4">Q2</th><th class="p-4">Q3</th><th class="p-4">Q4</th><th class="p-4">Q6</th><th class="p-4">Q7</th><th class="p-4">Q8 Useful topic</th><th class="p-4">Q9 Clarification</th><th class="p-4">Q14 Support</th><th class="p-4">Q18 Complex process</th><th class="p-4">Q20 Suggestion</th></tr></thead><tbody id="rows" class="divide-y divide-slate-100"></tbody></table></div>
+      </section>
+    </section>
+  </main>
+  <script>
+    let responses = [];
+    const escapeHtml = (v) => String(v || '-').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    document.getElementById('loginForm').addEventListener('submit', async (event) => { event.preventDefault(); const error = document.getElementById('loginError'); error.classList.add('hidden'); const result = await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('password').value})}); if (!result.ok) { error.textContent='Password မမှန်ပါ။ ထပ်မံကြိုးစားပါ။'; error.classList.remove('hidden'); return; } showReport(); });
+    async function showReport(){document.getElementById('loginView').classList.add('hidden');document.getElementById('reportView').classList.remove('hidden');await loadReport();}
+    async function loadReport(){const result=await fetch('/api/responses');if(result.status===401){document.getElementById('reportView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');return;}responses=await result.json();document.getElementById('total').textContent=responses.length;document.getElementById('average').innerHTML=`${responses.length?(responses.reduce((sum,r)=>sum+r.q1,0)/responses.length).toFixed(1):'0.0'} <span class="text-base font-semibold text-slate-400">/ 5</span>`;document.getElementById('readiness').textContent=responses.length?`${Math.round(responses.filter(r=>r.q14==='Yes').length/responses.length*100)}%`:'0%';document.getElementById('updated').textContent=`Updated ${new Date().toLocaleString()}`;renderRows();}
+    function renderRows(){const q=document.getElementById('search').value.toLowerCase();const filtered=responses.filter(r=>Object.values(r).join(' ').toLowerCase().includes(q));document.getElementById('rows').innerHTML=filtered.slice().reverse().map(r=>`<tr class="hover:bg-indigo-50/40 align-top"><td class="p-4 font-bold text-indigo-600">${escapeHtml(r.id)}</td><td class="p-4 whitespace-nowrap text-slate-500">${escapeHtml(r.timestamp)}</td><td class="p-4 font-semibold">${r.q1}</td><td class="p-4 font-semibold">${r.q2}</td><td class="p-4 font-semibold">${r.q3}</td><td class="p-4 font-semibold">${r.q4}</td><td class="p-4 whitespace-nowrap">${escapeHtml(r.q6)}</td><td class="p-4 font-semibold">${r.q7}</td><td class="p-4 max-w-xs">${escapeHtml(r.q8)}</td><td class="p-4 min-w-64 max-w-sm">${escapeHtml(r.q9)}</td><td class="p-4">${escapeHtml(r.q14)}</td><td class="p-4 min-w-64 max-w-sm">${escapeHtml(r.q18)}</td><td class="p-4 min-w-64 max-w-sm">${escapeHtml(r.q20)}</td></tr>`).join('')||'<tr><td colspan="13" class="p-10 text-center text-slate-400">Data မရှိသေးပါ။</td></tr>';}
+    async function exportExcel(){await loadReport();if(!responses.length){alert('Export လုပ်ရန် data မရှိသေးပါ။');return;}const rows=responses.map((r,index)=>({'No.':index+1,'Response ID':r.id,'Timestamp':r.timestamp,'Q1 Overall Satisfaction (1-5)':r.q1,'Q2 Ease of Understanding (1-5)':r.q2,'Q3 System Purpose (1-5)':r.q3,'Q4 System Flow (1-5)':r.q4,'Q6 Role Transfer Importance':r.q6,'Q7 Overall Value (1-5)':r.q7,'Q8 Most Useful Topic':r.q8,'Q9 Topics to Clarify':r.q9,'Q14 Support Ticket Understanding':r.q14,'Q18 Complex / Time-consuming Processes':r.q18,'Q20 SD Team Improvements':r.q20}));const sheet=XLSX.utils.json_to_sheet(rows);sheet['!cols']=[{wch:6},{wch:16},{wch:20},{wch:25},{wch:25},{wch:25},{wch:25},{wch:28},{wch:22},{wch:30},{wch:40},{wch:28},{wch:42},{wch:42}];const workbook=XLSX.utils.book_new();XLSX.utils.book_append_sheet(workbook,sheet,'Training Feedback');XLSX.writeFile(workbook,`SD_Training_Feedback_${new Date().toISOString().slice(0,10)}.xlsx`);}
+    fetch('/api/admin/session').then(r=>r.json()).then(data=>{if(data.authenticated)showReport();});
+  </script>
+</body>
+</html>

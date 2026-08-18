@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="my" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD Team - Modern Training Feedback Survey</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS for Exporting to Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Google Fonts for iOS-style Myanmar & English Text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --font-main: "Noto Sans Myanmar", "Plus Jakarta Sans", system-ui, sans-serif;
+        }
+        body {
+            font-family: var(--font-main);
+            background: linear-gradient(135deg, #f8fafc 0%, #f5f3ff 48%, #eff6ff 100%);
+            color: #1c1c1e;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.65;
+            letter-spacing: 0.01em;
+        }
+
+        /* iOS Glassmorphic Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        /* Custom Star Rating Interaction */
+        .rating-stars {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .rating-stars input {
+            display: none;
+        }
+
+        .rating-stars label {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #e2e8f0;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .rating-stars label:hover,
+        .rating-stars label:hover ~ label,
+        .rating-stars input:checked ~ label {
+            color: #fbbf24;
+            text-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+        }
+
+        .rating-stars label:hover {
+            transform: scale(1.2) rotate(-5deg);
+        }
+
+        .rating-stars input:checked + label {
+            transform: scale(1.1);
+        }
+
+        /* Scrollbar customization */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* iOS-style Card Radio interaction */
+        .select-card input:checked + .card-body {
+            border-color: #4f46e5;
+            background-color: #f5f3ff;
+            box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.15);
+        }
+        .select-card input:checked + .card-body .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Smooth tab transition */
+        .view-section {
+            transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-lg shadow-indigo-200 shrink-0">
+                    <i class="fa-solid fa-square-poll-vertical"></i>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <h1 class="font-extrabold text-sm sm:text-base tracking-tight text-slate-800">Training Feedback Survey</h1>
+                        <span class="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Anonymous
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-tight hidden sm:block">
+                        SD Team Internal System Evaluation Form
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Live Survey Completion Progress Bar -->
+        <div id="progressBarContainer" class="w-full bg-slate-100 h-1">
+            <div id="progressBar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 h-1 w-0 transition-all duration-300"></div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- ================= USER SURVEY PAGE (DEFAULT HOME PAGE) ================= -->
+        <div id="surveyPage" class="view-section space-y-6">
+            
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                <!-- Background ambient decorative circles -->
+                <div class="absolute -top-10 -right-10 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 space-y-3">
+                    <!-- <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs text-indigo-200 font-medium border border-white/10">
+                        <i class="fa-solid fa-lock text-amber-400"></i> 100% သီးသန့် အမည်မဖော်လိုသော စနစ် (Anonymous)
+                    </div> -->
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-snug">
+                        သင်တန်းတုံ့ပြန်ချက် စာတမ်းလွှာ
+                    </h2>
+                    <p class="text-slate-300 text-sm leading-relaxed max-w-2xl">
+                        ယနေ့ Training တွင် သင်၏ အတွေ့အကြုံနှင့် သဘောထားများကို လွတ်လပ်စွာ ဖြေဆိုပေးနိုင်ပါသည်။ 
+                        ဤဖြေဆိုချက်များကို မည်သူဖြေဆိုသည်ကို မှတ်တမ်းမယူဘဲ SD Team မှ လုပ်ငန်းစဉ်များ ပိုမိုကောင်းမွန်စေရန်သာ အသုံးပြုပါမည်။
+                    </p>
+                    
+                    <div class="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-300">
+                        <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-indigo-300"></i> ကြာချိန် - ၂ မိနစ်ခန့်</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-check text-emerald-400"></i> မေးခွန်း - ၁၁ ခု</span>
+                        <!-- <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-check text-purple-300"></i> JSON Database</span> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Survey Form -->
+            <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" class="space-y-6">
+
+                <!-- Q1: Rating 1-5 -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">1</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                ယနေ့ Training အပေါ် Overall Satisfaction ဘယ်လောက်ရှိပါသလဲ။ <span class="text-rose-500">*</span>
+                            </label>
+                            <p class="text-xs text-slate-400">(1 = အနည်းဆုံး / 5 = အများဆုံး)</p>
+                            
+                            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="rating-stars">
+                                    <input type="radio" id="q1-star5" name="q1" value="5" required onclick="updateStarLabel('q1-label', '5 Stars - အလွန်ကောင်းမွန်ပါသည်')" />
+                                    <label for="q1-star5" title="5 Stars"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" id="q1-star4" name="q1" value="4" onclick="updateStarLabel('q1-label', '4 Stars - ကောင်းမွန်ပါသည်')" />
+                                    <label for="q1-star4" title="4 Stars"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" id="q1-star3" name="q1" value="3" onclick="updateStarLabel('q1-label', '3 Stars - သင့်တော်ပါသည်')" />
+                                    <label for="q1-star3" title="3 Stars"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" id="q1-star2" name="q1" value="2" onclick="updateStarLabel('q1-label', '2 Stars - အားနည်းပါသည်')" />
+                                    <label for="q1-star2" title="2 Stars"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" id="q1-star1" name="q1" value="1" onclick="updateStarLabel('q1-label', '1 Star - အလွန်အားနည်းပါသည်')" />
+                                    <label for="q1-star1" title="1 Star"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <span id="q1-label" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center">
+                                    မရွေးချယ်ရသေးပါ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q2: Rating 1-5 -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">2</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                Training မှာ ရှင်းပြခဲ့သော အကြောင်းအရာများကို နားလည်ရလွယ်ကူပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+                            <p class="text-xs text-slate-400">(1 = ခက်ခဲသည် / 5 = အလွန်လွယ်ကူသည်)</p>
+                            
+                            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="rating-stars">
+                                    <input type="radio" id="q2-star5" name="q2" value="5" required onclick="updateStarLabel('q2-label', '5 Stars - အလွန်နားလည်လွယ်ပါသည်')" />
+                                    <label for="q2-star5"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q2-star4" name="q2" value="4" onclick="updateStarLabel('q2-label', '4 Stars - နားလည်လွယ်ပါသည်')" />
+                                    <label for="q2-star4"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q2-star3" name="q2" value="3" onclick="updateStarLabel('q2-label', '3 Stars - အသင့်အတင့်')" />
+                                    <label for="q2-star3"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q2-star2" name="q2" value="2" onclick="updateStarLabel('q2-label', '2 Stars - နားလည်ရခက်ပါသည်')" />
+                                    <label for="q2-star2"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q2-star1" name="q2" value="1" onclick="updateStarLabel('q2-label', '1 Star - အလွန်ခက်ခဲပါသည်')" />
+                                    <label for="q2-star1"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <span id="q2-label" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center">
+                                    မရွေးချယ်ရသေးပါ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q3: Rating 1-5 -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">3</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                Training ပြီးနောက် Company တွင် အသုံးပြုနေသော Software/System များ၏ Overall Purpose ကို ယခင်ထက် ပိုမိုသိရှိလာပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+                            
+                            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="rating-stars">
+                                    <input type="radio" id="q3-star5" name="q3" value="5" required onclick="updateStarLabel('q3-label', '5 Stars - အလွန်ပိုမိုသိရှိလာပါသည်')" />
+                                    <label for="q3-star5"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q3-star4" name="q3" value="4" onclick="updateStarLabel('q3-label', '4 Stars - ပိုမိုသိရှိလာပါသည်')" />
+                                    <label for="q3-star4"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q3-star3" name="q3" value="3" onclick="updateStarLabel('q3-label', '3 Stars - မသိမသာတိုးတက်လာပါသည်')" />
+                                    <label for="q3-star3"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q3-star2" name="q3" value="2" onclick="updateStarLabel('q3-label', '2 Stars - သိပ်မကွာခြားပါ')" />
+                                    <label for="q3-star2"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q3-star1" name="q3" value="1" onclick="updateStarLabel('q3-label', '1 Star - မသိရှိပါ')" />
+                                    <label for="q3-star1"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <span id="q3-label" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center">
+                                    မရွေးချယ်ရသေးပါ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q4: Rating 1-5 -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">4</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                System Process များတွင် <span class="inline-block bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg border border-indigo-100 font-semibold text-sm">Request ➔ Approval ➔ Processing ➔ Completion</span> ကဲ့သို့ အဆင့်ဆင့်ဆောင်ရွက်ပုံကို Overall အနေဖြင့် ပိုမိုနားလည်လာပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="rating-stars">
+                                    <input type="radio" id="q4-star5" name="q4" value="5" required onclick="updateStarLabel('q4-label', '5 Stars - အလွန်နားလည်ပါသည်')" />
+                                    <label for="q4-star5"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q4-star4" name="q4" value="4" onclick="updateStarLabel('q4-label', '4 Stars - နားလည်ပါသည်')" />
+                                    <label for="q4-star4"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q4-star3" name="q4" value="3" onclick="updateStarLabel('q4-label', '3 Stars - အသင့်အတင့်')" />
+                                    <label for="q4-star3"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q4-star2" name="q4" value="2" onclick="updateStarLabel('q4-label', '2 Stars - သိပ်မနားလည်ပါ')" />
+                                    <label for="q4-star2"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q4-star1" name="q4" value="1" onclick="updateStarLabel('q4-label', '1 Star - လုံးဝမနားလည်ပါ')" />
+                                    <label for="q4-star1"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <span id="q4-label" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center">
+                                    မရွေးချယ်ရသေးပါ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q6: Multiple Choice -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">5</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                System တစ်ခုတွင် မိမိ၏အဆင့်ပြီးနောက် မည်သည့် Role/Department သို့ ဆက်လက်ရောက်ရှိမည် ဆိုသည်ကို သိရှိခြင်းက လုပ်ငန်းအတွက် အရေးကြီးသည်ဟု ယူဆပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <label class="select-card cursor-pointer">
+                                    <input type="radio" name="q6" value="သဘောတူပါသည်။" required class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-semibold text-slate-700">သဘောတူပါသည်။</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-xl"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card cursor-pointer">
+                                    <input type="radio" name="q6" value="သဘောမတူပါ။" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-semibold text-slate-700">သဘောမတူပါ။</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-xl"></i></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q7: Rating 1-5 -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">6</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                Training အပြီး မိမိနှင့်တိုက်ရိုက်မသက်ဆိုင်သော System များကိုပါ Overall Process အနေနဲ့ သိရှိထားခြင်းက အလုပ်အတွက် အသုံးဝင်မည်ဟု ယူဆပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="rating-stars">
+                                    <input type="radio" id="q7-star5" name="q7" value="5" required onclick="updateStarLabel('q7-label', '5 Stars - အလွန်အသုံးဝင်ပါသည်')" />
+                                    <label for="q7-star5"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q7-star4" name="q7" value="4" onclick="updateStarLabel('q7-label', '4 Stars - အသုံးဝင်ပါသည်')" />
+                                    <label for="q7-star4"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q7-star3" name="q7" value="3" onclick="updateStarLabel('q7-label', '3 Stars - အသင့်အတင့်')" />
+                                    <label for="q7-star3"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q7-star2" name="q7" value="2" onclick="updateStarLabel('q7-label', '2 Stars - သိပ်မသုံးဝင်ပါ')" />
+                                    <label for="q7-star2"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="q7-star1" name="q7" value="1" onclick="updateStarLabel('q7-label', '1 Star - အသုံးမဝင်ပါ')" />
+                                    <label for="q7-star1"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <span id="q7-label" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center">
+                                    မရွေးချယ်ရသေးပါ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q8: Multiple Choice -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">7</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                ယနေ့ Training မှ မိမိအတွက် အသုံးဝင်ဆုံးအပိုင်း က ဘာဖြစ်ပါသလဲ။ <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="space-y-2.5 pt-1">
+                                <label class="select-card block cursor-pointer">
+                                    <input type="radio" name="q8" value="Feature အသစ်များ" required class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-medium text-slate-700">Feature အသစ်များ</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card block cursor-pointer">
+                                    <input type="radio" name="q8" value="Process flow များ" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-medium text-slate-700">Process flow များ</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card block cursor-pointer">
+                                    <input type="radio" name="q8" value="အနာဂတ်မှာ တည်ဆောက်မည့် Projects များ" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-medium text-slate-700">အနာဂတ်မှာ တည်ဆောက်မည့် Projects များ</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card block cursor-pointer">
+                                    <input type="radio" name="q8" value="AI နှင့် ဒစ်ဂျစ်တယ်ဆိုင်ရာ" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-medium text-slate-700">AI နှင့် ဒစ်ဂျစ်တယ်ဆိုင်ရာ</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card block cursor-pointer">
+                                    <input type="radio" name="q8" value="ထိုအချက်များအားလုံး" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <span class="font-medium text-slate-700">ထိုအချက်များအားလုံး</span>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q9: Open-ended Essay Box -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">8</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                Training ထဲတွင် ပိုမိုရှင်းလင်းစေချင်သော / ထပ်မံသိရှိလိုသော အပိုင်းရှိပါသလား။
+                            </label>
+                            <p class="text-xs text-slate-400 font-normal">Optional (မရှိပါက လွတ်လပ်စွာ ထားနိုင်ပါသည်)</p>
+                            
+                            <textarea name="q9" rows="3" placeholder="ဤနေရာတွင် ရေးသားနိုင်ပါသည်..." class="w-full p-4 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm text-slate-700 resize-y bg-slate-50/50 hover:bg-white focus:bg-white"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q14: Multiple Choice -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">9</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                Software Issue တစ်ခုကို Support Team သို့ တင်ပြသည့်အခါ <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold text-xs border border-indigo-100">Error Screenshot, ဖြစ်ပွားသည့်အချိန်, Document No., ဖြစ်ပွားပုံ Steps</span> စသည်တို့ကို ပေးရန်လိုအပ်ကြောင်း နားလည်ပါသလား။ <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="select-card cursor-pointer">
+                                    <input type="radio" name="q14" value="Yes" required class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                                            <span class="font-semibold text-slate-700">Yes</span>
+                                        </div>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-check text-sm"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card cursor-pointer">
+                                    <input type="radio" name="q14" value="Partly" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fa-solid fa-circle-question text-amber-500"></i>
+                                            <span class="font-semibold text-slate-700">Partly</span>
+                                        </div>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-check text-sm"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="select-card cursor-pointer">
+                                    <input type="radio" name="q14" value="No" class="hidden" />
+                                    <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fa-solid fa-circle-xmark text-rose-500"></i>
+                                            <span class="font-semibold text-slate-700">No</span>
+                                        </div>
+                                        <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-check text-sm"></i></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q18: Open-ended Essay Box -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">10</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                လက်ရှိ မိမိအသုံးပြုနေသော Software/System များတွင် အလုပ်ပုံစံရှုပ်ထွေးသော၊ အချိန်ကြာသော သို့မဟုတ် ထပ်ခါတလည်လုပ်နေရသော Process ရှိပါသလား။ ရှိပါက ရေးပေးပါ။
+                            </label>
+                            <p class="text-xs text-slate-400 font-normal">Optional (အသေးစိတ် ရေးသားပေးနိုင်ပါသည်)</p>
+                            
+                            <textarea name="q18" rows="3" placeholder="လုပ်ငန်းစဉ်ဆိုင်ရာ အခက်အခဲများကို ရေးသားပေးပါ..." class="w-full p-4 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm text-slate-700 resize-y bg-slate-50/50 hover:bg-white focus:bg-white"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q20: Open-ended Essay Box -->
+                <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
+                    <div class="flex items-start gap-4">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 text-sm border border-indigo-100">11</span>
+                        <div class="w-full space-y-3">
+                            <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
+                                မိမိ၏နေ့စဉ်လုပ်ငန်း ပိုမိုလွယ်ကူစေရန် SD Team မှ နောက်ထပ် ဘာ Support / System / Improvement လုပ်ပေးစေချင်ပါသလဲ။
+                            </label>
+                            <p class="text-xs text-slate-400 font-normal">Optional (အကြံပြုချက်များကို လွတ်လပ်စွာ ရေးနိုင်ပါသည်)</p>
+
+                            <textarea name="q20" rows="3" placeholder="အကြံပြုချက်များနှင့် တောင်းဆိုချက်များကို ရေးသားပါ..." class="w-full p-4 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm text-slate-700 resize-y bg-slate-50/50 hover:bg-white focus:bg-white"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Submit Action -->
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 text-white font-bold rounded-2xl shadow-xl shadow-indigo-200 hover:shadow-indigo-300 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 text-base">
+                        <i class="fa-solid fa-paper-plane text-indigo-200"></i>
+                        <span>Submit</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- ================= HIDDEN ADMIN REPORT PAGE ================= -->
+        <div id="adminPage" class="view-section hidden space-y-6">
+            
+            <!-- Admin Header Banner -->
+            <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie text-xs"></i> Admin Analytics Panel
+                        </span>
+                        <span class="text-xs text-slate-400" id="lastUpdatedText">Updated live</span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Survey Responses & Reports</h2>
+                    <p class="text-sm text-slate-500">Real-time statistics, charts, and Excel export tool</p>
+                </div>
+                
+                <!-- Action Tools -->
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-md shadow-emerald-200 transition hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-file-excel text-base"></i>
+                        <span>Download Excel (.xlsx)</span>
+                    </button>
+                    
+                    <button onclick="exportJSON()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-md transition hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-code text-base"></i>
+                        <span>Export JSON</span>
+                    </button>
+
+                    <button onclick="closeAdminView()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-3 rounded-2xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back to Survey</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Responses</p>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800" id="totalResponseCount">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Avg Satisfaction (Q1)</p>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800" id="avgSatisfaction">0.0 <span class="text-xs font-normal text-slate-400">/ 5</span></h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Support Readiness (Q14)</p>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800" id="yesReadinessPct">0%</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Process Agreement (Q6)</p>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800" id="q6AgreePct">0%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Visualizations -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Bar Chart: Average Star Ratings -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-indigo-600"></i> Rating Questions Average (1-5 Stars)
+                        </h4>
+                    </div>
+                    <div class="h-64 relative">
+                        <canvas id="ratingsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart: Q8 Useful Topic -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-purple-600"></i> Most Useful Topics (Q8 Choice)
+                        </h4>
+                    </div>
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="mcqChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-table-list text-indigo-600"></i> Anonymous Answer Records
+                        </h4>
+                        <p class="text-xs text-slate-400">Showing latest submitted records first</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search feedback..." class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="clearAllData()" class="text-xs text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl font-bold transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
+                                <th class="p-3">Ref ID</th>
+                                <th class="p-3">Timestamp</th>
+                                <th class="p-3">Q1</th>
+                                <th class="p-3">Q2</th>
+                                <th class="p-3">Q3</th>
+                                <th class="p-3">Q4</th>
+                                <th class="p-3">Q6</th>
+                                <th class="p-3">Q7</th>
+                                <th class="p-3">Q8</th>
+                                <th class="p-3">Q9 (Clarify)</th>
+                                <th class="p-3">Q14</th>
+                                <th class="p-3">Q18 (Complex)</th>
+                                <th class="p-3">Q20 (Suggest)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="responsesTableBody" class="divide-y divide-slate-100 font-normal">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Admin Password Verification Modal -->
+    <div id="adminPasscodeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100 transform transition-all scale-100">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner border border-indigo-100">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-800">Admin Authentication</h3>
+                <p class="text-xs text-slate-500">Enter passcode to view response reports</p>
+            </div>
+            
+            <div>
+                <input type="password" id="adminPasswordInput" placeholder="Password (default: admin123)" class="w-full p-3.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-center font-mono text-base bg-slate-50 focus:bg-white transition" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <p id="passcodeError" class="text-rose-500 text-xs text-center mt-2 hidden font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Incorrect password. Try again.
+                </p>
+            </div>
+            
+            <div class="flex gap-2 pt-1">
+                <button onclick="closePasswordModal()" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition">Cancel</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-xs transition shadow-md shadow-indigo-200">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Success Confirmation Modal -->
+    <div id="successModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center space-y-5 border border-slate-100">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-lg shadow-emerald-100">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <h3 class="text-2xl font-extrabold text-slate-800">ကျေးဇူးတင်ရှိပါသည်။</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    သင်၏ Feedback နှင့် အကြံပြုချက်များကို အောင်မြင်စွာ ပေးပို့ပြီးပါပြီ။ SD Team မှ စနစ်များ ပိုမိုကောင်းမွန်စေရန် ဆက်လက်ကြိုးစားသွားပါမည်။
+                </p>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-2xl text-xs text-slate-500 font-mono border border-slate-200/60" id="submittedRefId">
+                Response ID: RESP-XXXXXX
+            </div>
+
+            <button onclick="closeSuccessModal()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm shadow-xl shadow-indigo-200 transition transform hover:scale-[1.02] active:scale-[0.98]">
+                နောက်ထပ် မေးခွန်းအသစ်ဖြေဆိုမည်
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-5 text-xs text-slate-500 mt-12">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-indigo-500"></i>
+                <span>SD Team Anonymous Survey Platform &copy; 2026.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let responsesCache = [];
+        let ratingsChartInstance = null;
+        let mcqChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupProgressBarTracker();
+        });
+
+        async function loadResponses() {
+            const response = await fetch('/api/responses');
+            if (!response.ok) throw new Error('Unable to load responses.');
+            responsesCache = await response.json();
+            return responsesCache;
+        }
+
+        function updateStarLabel(elementId, text) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerText = text;
+                el.classList.remove('text-slate-500');
+                el.classList.add('text-indigo-600', 'bg-indigo-50', 'border-indigo-200');
+            }
+            updateProgressBar();
+        }
+
+        function setupProgressBarTracker() {
+            const form = document.getElementById('feedbackForm');
+            form.addEventListener('change', updateProgressBar);
+        }
+
+        function updateProgressBar() {
+            // Mandatory required fields Q1, Q2, Q3, Q4, Q6, Q7, Q8, Q14 (8 questions)
+            const requiredFields = ['q1', 'q2', 'q3', 'q4', 'q6', 'q7', 'q8', 'q14'];
+            let filledCount = 0;
+
+            requiredFields.forEach(name => {
+                const checked = document.querySelector(`input[name="${name}"]:checked`);
+                if (checked) filledCount++;
+            });
+
+            const pct = Math.round((filledCount / requiredFields.length) * 100);
+            const bar = document.getElementById('progressBar');
+            if (bar) {
+                bar.style.width = pct + '%';
+            }
+        }
+
+        async function handleSurveySubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const record = {
+                q1: parseInt(formData.get('q1') || '0'),
+                q2: parseInt(formData.get('q2') || '0'),
+                q3: parseInt(formData.get('q3') || '0'),
+                q4: parseInt(formData.get('q4') || '0'),
+                q6: formData.get('q6') || '-',
+                q7: parseInt(formData.get('q7') || '0'),
+                q8: formData.get('q8') || '-',
+                q9: formData.get('q9') ? formData.get('q9').trim() : '-',
+                q14: formData.get('q14') || '-',
+                q18: formData.get('q18') ? formData.get('q18').trim() : '-',
+                q20: formData.get('q20') ? formData.get('q20').trim() : '-'
+            };
+
+            let savedRecord;
+            try {
+                const response = await fetch('/api/responses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record)
+                });
+                if (!response.ok) throw new Error('Unable to save response.');
+                savedRecord = await response.json();
+                responsesCache.push(savedRecord);
+            } catch (error) {
+                alert('တုံ့ပြန်ချက်ကို သိမ်းဆည်းမရသေးပါ။ Server run နေကြောင်းစစ်ပြီး ထပ်မံကြိုးစားပါ။');
+                return;
+            }
+
+            // Reset Form and display modal
+            form.reset();
+            
+            // Reset star labels
+            ['q1-label', 'q2-label', 'q3-label', 'q4-label', 'q7-label'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerText = 'မရွေးချယ်ရသေးပါ';
+                    el.className = 'text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shrink-0 text-center';
+                }
+            });
+            
+            updateProgressBar();
+
+            document.getElementById('submittedRefId').innerText = 'Anonymous Reference ID: ' + savedRecord.id;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function promptAdminAccess() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('passcodeError').classList.add('hidden');
+            document.getElementById('adminPasscodeModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            document.getElementById('adminPasscodeModal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            // Admin passwords supported
+            if (pass === 'admin123' || pass === 'sdteam' || pass === '1234') {
+                closePasswordModal();
+                openAdminView();
+            } else {
+                document.getElementById('passcodeError').classList.remove('hidden');
+            }
+        }
+
+        function openAdminView() {
+            document.getElementById('surveyPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderAdminDashboard();
+        }
+
+        function closeAdminView() {
+            document.getElementById('adminPage').classList.add('hidden');
+            document.getElementById('surveyPage').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function renderAdminDashboard() {
+            let responses;
+            try {
+                responses = await loadResponses();
+            } catch (error) {
+                alert('Server မှ data မရရှိပါ။');
+                return;
+            }
+            
+            // Total Count
+            document.getElementById('totalResponseCount').innerText = responses.length;
+            document.getElementById('lastUpdatedText').innerText = 'Updated: ' + new Date().toLocaleTimeString();
+
+            // Calculate Metrics
+            if (responses.length > 0) {
+                const avgQ1 = (responses.reduce((sum, r) => sum + (r.q1 || 0), 0) / responses.length).toFixed(1);
+                document.getElementById('avgSatisfaction').innerHTML = `${avgQ1} <span class="text-xs font-normal text-slate-400">/ 5</span>`;
+
+                const yesCount = responses.filter(r => r.q14 === 'Yes').length;
+                const pct14 = Math.round((yesCount / responses.length) * 100);
+                document.getElementById('yesReadinessPct').innerText = pct14 + '%';
+
+                const agreeCount = responses.filter(r => r.q6 === 'သဘောတူပါသည်။').length;
+                const pct6 = Math.round((agreeCount / responses.length) * 100);
+                document.getElementById('q6AgreePct').innerText = pct6 + '%';
+            } else {
+                document.getElementById('avgSatisfaction').innerText = '0.0';
+                document.getElementById('yesReadinessPct').innerText = '0%';
+                document.getElementById('q6AgreePct').innerText = '0%';
+            }
+
+            // Populate Table
+            renderTableRows(responses);
+
+            // Render Chart Visualizations
+            renderCharts(responses);
+        }
+
+        function renderTableRows(responses) {
+            const tbody = document.getElementById('responsesTableBody');
+            tbody.innerHTML = '';
+
+            if (responses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="p-8 text-center text-slate-400">ဖြေဆိုထားသော အချက်အလက်များ မရှိသေးပါ။</td></tr>`;
+                return;
+            }
+
+            responses.slice().reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-indigo-50/30 transition text-xs";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-indigo-600">${escapeHtml(r.id)}</td>
+                    <td class="p-3 whitespace-nowrap text-slate-500">${escapeHtml(r.timestamp)}</td>
+                    <td class="p-3 font-bold text-slate-800">${r.q1} <i class="fa-solid fa-star text-amber-400 text-[10px]"></i></td>
+                    <td class="p-3 font-bold text-slate-800">${r.q2} <i class="fa-solid fa-star text-amber-400 text-[10px]"></i></td>
+                    <td class="p-3 font-bold text-slate-800">${r.q3} <i class="fa-solid fa-star text-amber-400 text-[10px]"></i></td>
+                    <td class="p-3 font-bold text-slate-800">${r.q4} <i class="fa-solid fa-star text-amber-400 text-[10px]"></i></td>
+                    <td class="p-3 whitespace-nowrap">${escapeHtml(r.q6)}</td>
+                    <td class="p-3 font-bold text-slate-800">${r.q7} <i class="fa-solid fa-star text-amber-400 text-[10px]"></i></td>
+                    <td class="p-3 max-w-[140px] truncate" title="${escapeHtml(r.q8)}">${escapeHtml(r.q8)}</td>
+                    <td class="p-3 max-w-[160px] truncate" title="${escapeHtml(r.q9)}">${escapeHtml(r.q9)}</td>
+                    <td class="p-3 font-semibold ${r.q14 === 'Yes' ? 'text-emerald-600' : 'text-slate-600'}">${escapeHtml(r.q14)}</td>
+                    <td class="p-3 max-w-[180px] truncate" title="${escapeHtml(r.q18)}">${escapeHtml(r.q18)}</td>
+                    <td class="p-3 max-w-[180px] truncate" title="${escapeHtml(r.q20)}">${escapeHtml(r.q20)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const responses = responsesCache;
+            const filtered = responses.filter(r => 
+                r.id.toLowerCase().includes(query) ||
+                r.q8.toLowerCase().includes(query) ||
+                r.q9.toLowerCase().includes(query) ||
+                r.q18.toLowerCase().includes(query) ||
+                r.q20.toLowerCase().includes(query)
+            );
+            renderTableRows(filtered);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function renderCharts(responses) {
+            if (responses.length === 0) return;
+
+            // Average Star Ratings
+            const avgQ1 = (responses.reduce((sum, r) => sum + (r.q1 || 0), 0) / responses.length);
+            const avgQ2 = (responses.reduce((sum, r) => sum + (r.q2 || 0), 0) / responses.length);
+            const avgQ3 = (responses.reduce((sum, r) => sum + (r.q3 || 0), 0) / responses.length);
+            const avgQ4 = (responses.reduce((sum, r) => sum + (r.q4 || 0), 0) / responses.length);
+            const avgQ7 = (responses.reduce((sum, r) => sum + (r.q7 || 0), 0) / responses.length);
+
+            // Render Bar Chart
+            const ctx1 = document.getElementById('ratingsChart').getContext('2d');
+            if (ratingsChartInstance) ratingsChartInstance.destroy();
+            ratingsChartInstance = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1 Satisfaction', 'Q2 Easy Learn', 'Q3 Purpose', 'Q4 System Flow', 'Q7 Overall Value'],
+                    datasets: [{
+                        label: 'Avg Rating Score (1-5)',
+                        data: [avgQ1, avgQ2, avgQ3, avgQ4, avgQ7],
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: 'rgb(79, 70, 229)',
+                        borderWidth: 1.5,
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 5,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+
+            // Q8 MCQ Distribution
+            const countsQ8 = {};
+            responses.forEach(r => {
+                const val = r.q8 || 'N/A';
+                countsQ8[val] = (countsQ8[val] || 0) + 1;
+            });
+
+            const ctx2 = document.getElementById('mcqChart').getContext('2d');
+            if (mcqChartInstance) mcqChartInstance.destroy();
+            mcqChartInstance = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(countsQ8),
+                    datasets: [{
+                        data: Object.values(countsQ8),
+                        backgroundColor: [
+                            '#6366f1',
+                            '#8b5cf6',
+                            '#ec4899',
+                            '#10b981',
+                            '#f59e0b',
+                            '#64748b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        async function exportToExcel() {
+            const responses = await loadResponses();
+            if (responses.length === 0) {
+                alert('ထုတ်ယူရန် ဒေတာ မရှိသေးပါ။');
+                return;
+            }
+
+            const excelRows = responses.map((r, idx) => ({
+                'No.': idx + 1,
+                'Response ID': r.id,
+                'Timestamp': r.timestamp,
+                'Q1 (Overall Satisfaction 1-5)': r.q1,
+                'Q2 (Ease of Understanding 1-5)': r.q2,
+                'Q3 (System Purpose 1-5)': r.q3,
+                'Q4 (Request-Approval Flow 1-5)': r.q4,
+                'Q6 (Role Transfer Importance)': r.q6,
+                'Q7 (Overall Value 1-5)': r.q7,
+                'Q8 (Most Useful Topic)': r.q8,
+                'Q9 (Topics to Clarify)': r.q9,
+                'Q14 (Issue Support Ticket Understanding)': r.q14,
+                'Q18 (Complex/Time-consuming Processes)': r.q18,
+                'Q20 (SD Team Improvements)': r.q20
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Training Feedback");
+
+            // Auto column width calculation
+            worksheet['!cols'] = [
+                { wch: 6 },  { wch: 16 }, { wch: 20 }, 
+                { wch: 25 }, { wch: 25 }, { wch: 25 }, 
+                { wch: 28 }, { wch: 25 }, { wch: 22 }, 
+                { wch: 30 }, { wch: 35 }, { wch: 25 }, 
+                { wch: 40 }, { wch: 40 }
+            ];
+
+            const fileName = `SD_Training_Feedback_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        }
+
+        async function exportJSON() {
+            const dataStr = JSON.stringify(await loadResponses(), null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sd_survey_database_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function clearAllData() {
+            if (confirm('သတိပေးချက်: တုံ့ပြန်ထားသော ဒေတာအားလုံးကို အပြီးတိုင် ဖျက်ပစ်ပါမည်။ သေချာပါသလား။')) {
+                try {
+                    const response = await fetch('/api/responses', { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Unable to clear data.');
+                    responsesCache = [];
+                    renderAdminDashboard();
+                } catch (error) {
+                    alert('ဒေတာဖျက်မရသေးပါ။ ထပ်မံကြိုးစားပါ။');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
