@@ -384,10 +384,11 @@
                             <label class="block font-bold text-slate-800 text-base md:text-lg leading-snug">
                                 ယနေ့ Training မှ မိမိအတွက် အသုံးဝင်ဆုံးအပိုင်း က ဘာဖြစ်ပါသလဲ။ <span class="text-rose-500">*</span>
                             </label>
+                            <p class="text-xs text-slate-400">တစ်ခုထက်ပို၍ ရွေးချယ်နိုင်ပါသည်။</p>
 
                             <div class="space-y-2.5 pt-1">
                                 <label class="select-card block cursor-pointer">
-                                    <input type="radio" name="q8" value="Feature အသစ်များ" required class="hidden" />
+                                    <input type="checkbox" name="q8" value="Feature အသစ်များ" class="hidden" />
                                     <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
                                         <span class="font-medium text-slate-700">Feature အသစ်များ</span>
                                         <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
@@ -395,7 +396,7 @@
                                 </label>
 
                                 <label class="select-card block cursor-pointer">
-                                    <input type="radio" name="q8" value="Process flow များ" class="hidden" />
+                                    <input type="checkbox" name="q8" value="Process flow များ" class="hidden" />
                                     <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
                                         <span class="font-medium text-slate-700">Process flow များ</span>
                                         <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
@@ -403,7 +404,7 @@
                                 </label>
 
                                 <label class="select-card block cursor-pointer">
-                                    <input type="radio" name="q8" value="အနာဂတ်မှာ တည်ဆောက်မည့် Projects များ" class="hidden" />
+                                    <input type="checkbox" name="q8" value="အနာဂတ်မှာ တည်ဆောက်မည့် Projects များ" class="hidden" />
                                     <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
                                         <span class="font-medium text-slate-700">အနာဂတ်မှာ တည်ဆောက်မည့် Projects များ</span>
                                         <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
@@ -411,7 +412,7 @@
                                 </label>
 
                                 <label class="select-card block cursor-pointer">
-                                    <input type="radio" name="q8" value="AI နှင့် ဒစ်ဂျစ်တယ်ဆိုင်ရာ" class="hidden" />
+                                    <input type="checkbox" name="q8" value="AI နှင့် ဒစ်ဂျစ်တယ်ဆိုင်ရာ" class="hidden" />
                                     <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
                                         <span class="font-medium text-slate-700">AI နှင့် ဒစ်ဂျစ်တယ်ဆိုင်ရာ</span>
                                         <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
@@ -419,7 +420,7 @@
                                 </label>
 
                                 <label class="select-card block cursor-pointer">
-                                    <input type="radio" name="q8" value="ထိုအချက်များအားလုံး" class="hidden" />
+                                    <input type="checkbox" name="q8" value="ထိုအချက်များအားလုံး" class="hidden" />
                                     <div class="card-body p-4 rounded-2xl border-2 border-slate-200 transition-all flex items-center justify-between hover:border-slate-300">
                                         <span class="font-medium text-slate-700">ထိုအချက်များအားလုံး</span>
                                         <div class="check-icon opacity-0 transition-all text-indigo-600"><i class="fa-solid fa-circle-check text-lg"></i></div>
@@ -730,7 +731,7 @@
             </div>
 
             <button onclick="closeSuccessModal()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm shadow-xl shadow-indigo-200 transition transform hover:scale-[1.02] active:scale-[0.98]">
-                နောက်ထပ် မေးခွန်းအသစ်ဖြေဆိုမည်
+                Okay
             </button>
         </div>
     </div>
@@ -797,6 +798,12 @@
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
+            const selectedQ8 = formData.getAll('q8');
+
+            if (selectedQ8.length === 0) {
+                alert('အသုံးဝင်ဆုံးအပိုင်း အနည်းဆုံးတစ်ခု ရွေးချယ်ပေးပါ။');
+                return;
+            }
 
             const record = {
                 q1: parseInt(formData.get('q1') || '0'),
@@ -805,7 +812,7 @@
                 q4: parseInt(formData.get('q4') || '0'),
                 q6: formData.get('q6') || '-',
                 q7: parseInt(formData.get('q7') || '0'),
-                q8: formData.get('q8') || '-',
+                q8: selectedQ8.join(', '),
                 q9: formData.get('q9') ? formData.get('q9').trim() : '-',
                 q14: formData.get('q14') || '-',
                 q18: formData.get('q18') ? formData.get('q18').trim() : '-',
