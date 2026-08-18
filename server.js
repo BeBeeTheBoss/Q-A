@@ -1,6 +1,7 @@
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const os = require('node:os');
 const { randomUUID } = require('node:crypto');
 
 const PORT = Number(process.env.PORT) || 2233;
@@ -142,4 +143,17 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-server.listen(PORT, () => console.log(`Survey app is running at http://localhost:${PORT}`));
+function getNetworkUrls() {
+  const addresses = Object.values(os.networkInterfaces())
+    .flat()
+    .filter((network) => network && network.family === 'IPv4' && !network.internal)
+    .map((network) => `http://${network.address}:${PORT}`);
+  return addresses.length ? addresses : [`http://localhost:${PORT}`];
+}
+
+// 0.0.0.0 accepts connections from this computer and devices on the same network.
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('Survey app is running at:');
+  console.log(`  Local:   http://localhost:${PORT}`);
+  getNetworkUrls().forEach((url) => console.log(`  Network: ${url}`));
+});
