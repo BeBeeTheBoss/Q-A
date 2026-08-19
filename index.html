@@ -172,7 +172,7 @@
             </div>
 
             <!-- Survey Form -->
-            <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" class="space-y-6">
+            <form id="feedbackForm" onsubmit="handleSurveySubmit(event)" novalidate class="space-y-6">
 
                 <!-- Q1: Rating 1-5 -->
                 <div class="bg-white p-6 md:p-7 rounded-3xl border border-slate-200/80 shadow-sm transition hover:shadow-md">
@@ -687,6 +687,27 @@
 
     </main>
 
+    <!-- Required Fields Validation Modal -->
+    <div id="validationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="validationModalTitle">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 space-y-5 border border-slate-100">
+            <div class="flex items-start gap-4">
+                <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 text-2xl shadow-inner border border-amber-200">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 id="validationModalTitle" class="text-xl font-extrabold text-slate-800">လိုအပ်သောအဖြေများ ကျန်ရှိနေပါသည်</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">အောက်ပါ မေးခွန်းများကို ဖြေဆိုပြီးမှ Submit လုပ်ပေးပါ။</p>
+                </div>
+            </div>
+
+            <ul id="missingFieldsList" class="bg-amber-50 border border-amber-100 rounded-2xl px-5 py-4 space-y-2 text-sm font-medium text-slate-700 list-disc list-inside"></ul>
+
+            <button type="button" onclick="closeValidationModal()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-sm shadow-lg shadow-indigo-200 transition transform hover:scale-[1.02] active:scale-[0.98]">
+                ပြန်လည်ဖြေဆိုမည်
+            </button>
+        </div>
+    </div>
+
     <!-- Admin Password Verification Modal -->
     <div id="adminPasscodeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100 transform transition-all scale-100">
@@ -794,14 +815,47 @@
             }
         }
 
+        function getMissingRequiredFields(formData) {
+            const requiredFields = [
+                { name: 'q1', label: 'မေးခွန်း (၁) — Overall Satisfaction' },
+                { name: 'q2', label: 'မေးခွန်း (၂) — Training အကြောင်းအရာ နားလည်လွယ်ကူမှု' },
+                { name: 'q3', label: 'မေးခွန်း (၃) — Software/System Purpose နားလည်မှု' },
+                { name: 'q4', label: 'မေးခွန်း (၄) — System Process နားလည်မှု' },
+                { name: 'q6', label: 'မေးခွန်း (၅)' },
+                { name: 'q7', label: 'မေးခွန်း (၆) — Training ၏ အသုံးဝင်မှု' },
+                { name: 'q8', label: 'မေးခွန်း (၇) — အသုံးဝင်ဆုံးအပိုင်း' },
+                { name: 'q14', label: 'မေးခွန်း (၉)' }
+            ];
+
+            return requiredFields.filter(({ name }) => {
+                const value = name === 'q8' ? formData.getAll(name) : [formData.get(name)];
+                return !value.some(Boolean);
+            });
+        }
+
+        function showValidationModal(missingFields) {
+            const list = document.getElementById('missingFieldsList');
+            list.replaceChildren(...missingFields.map(({ label }) => {
+                const item = document.createElement('li');
+                item.textContent = label;
+                return item;
+            }));
+            document.getElementById('validationModal').classList.remove('hidden');
+        }
+
+        function closeValidationModal() {
+            document.getElementById('validationModal').classList.add('hidden');
+        }
+
         async function handleSurveySubmit(event) {
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
             const selectedQ8 = formData.getAll('q8');
 
-            if (selectedQ8.length === 0) {
-                alert('အသုံးဝင်ဆုံးအပိုင်း အနည်းဆုံးတစ်ခု ရွေးချယ်ပေးပါ။');
+            const missingFields = getMissingRequiredFields(formData);
+            if (missingFields.length) {
+                showValidationModal(missingFields);
                 return;
             }
 
