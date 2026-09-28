@@ -12,6 +12,16 @@ const DATA_FILE = path.join(ROOT, 'data.json');
 const INDEX_FILE = path.join(ROOT, 'index.html');
 const REPORT_FILE = path.join(ROOT, 'report.html');
 const activeSessions = new Set();
+const timestampFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Yangon',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23'
+});
 
 async function readResponses() {
   try {
@@ -52,8 +62,12 @@ function requireAdmin(request, response) {
 }
 
 function formatTimestamp(date = new Date()) {
-  const pad = (value) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  const parts = Object.fromEntries(
+    timestampFormatter.formatToParts(date)
+      .filter(({ type }) => type !== 'literal')
+      .map(({ type, value }) => [type, value])
+  );
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 }
 
 function createRecord(input) {
