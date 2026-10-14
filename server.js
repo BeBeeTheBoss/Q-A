@@ -11,6 +11,7 @@ const ROOT = __dirname;
 const DATA_FILE = path.join(ROOT, 'data.json');
 const INDEX_FILE = path.join(ROOT, 'index.html');
 const REPORT_FILE = path.join(ROOT, 'report.html');
+const STYLES_FILE = path.join(ROOT, 'styles.css');
 const activeSessions = new Set();
 const timestampFormatter = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Yangon',
@@ -142,6 +143,15 @@ const server = http.createServer(async (request, response) => {
       const html = await fs.readFile(REPORT_FILE);
       response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return response.end(html);
+    }
+
+    if (url.pathname === '/styles.css' && request.method === 'GET') {
+      const css = await fs.readFile(STYLES_FILE);
+      response.writeHead(200, {
+        'Content-Type': 'text/css; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600'
+      });
+      return response.end(css);
     }
 
     if (url.pathname === '/' && request.method === 'GET') {

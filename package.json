@@ -4,10 +4,15 @@
   "private": true,
   "description": "Training feedback survey with JSON file storage",
   "scripts": {
+    "build:css": "tailwindcss -i ./tailwind.css -o ./styles.css --minify",
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }

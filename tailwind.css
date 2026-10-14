@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* Scan both pages so every utility used by the survey and report is emitted. */
+@source "./index.html";
+@source "./report.html";
